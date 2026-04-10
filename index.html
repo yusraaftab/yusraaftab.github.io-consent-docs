@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Consent Management System</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#1a1a1a;background:#f8f7f4}
+  .page{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+  h1{font-size:2rem;font-weight:700;color:#1a1a1a;margin-bottom:.4rem}
+  h2{font-size:1.35rem;font-weight:700;color:#1a1a1a;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:2px solid #e5e3de;letter-spacing:-.01em}
+  h3{font-weight:700;color:#374151;margin:1.5rem 0 .5rem;text-transform:uppercase;letter-spacing:.06em;font-size:.78rem}
+  p{color:#444;margin-bottom:.75rem}
+  .subtitle{color:#666;font-size:1rem;margin-bottom:2rem}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+  .badge-blue{background:#dbeafe;color:#1e40af}
+  .badge-green{background:#dcfce7;color:#166534}
+  .badge-amber{background:#fef3c7;color:#92400e}
+  .badge-red{background:#fee2e2;color:#991b1b}
+  .badge-purple{background:#ede9fe;color:#5b21b6}
+  .badge-gray{background:#f1f0eb;color:#374151}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1rem 0}
+  .card{background:#fff;border:1px solid #e5e3de;border-radius:10px;padding:1.25rem}
+  .card-icon{font-size:1.5rem;margin-bottom:.6rem}
+  .card h3{margin:.3rem 0 .4rem;font-size:.82rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.06em}
+  .card p{font-size:.875rem;color:#555;margin:0;line-height:1.6}
+  table{width:100%;border-collapse:collapse;font-size:.875rem;margin:1rem 0}
+  th{background:#f1f0eb;text-align:left;padding:.6rem .9rem;font-weight:600;color:#374151;border-bottom:1px solid #e5e3de}
+  td{padding:.6rem .9rem;border-bottom:1px solid #f0eeea;color:#444;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  code{font-family:monospace;font-size:.85em;background:#f1f0eb;padding:1px 5px;border-radius:3px;color:#c7254e}
+  .method{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;font-family:monospace;min-width:50px;text-align:center}
+  .get{background:#dbeafe;color:#1e40af}
+  .post{background:#dcfce7;color:#166534}
+  .put{background:#fef3c7;color:#92400e}
+  .patch{background:#ede9fe;color:#5b21b6}
+  .delete{background:#fee2e2;color:#991b1b}
+  .steps{counter-reset:step;list-style:none;margin:1rem 0}
+  .steps li{counter-increment:step;display:flex;gap:1rem;margin-bottom:1rem;align-items:flex-start}
+  .steps li::before{content:counter(step);min-width:28px;height:28px;border-radius:50%;background:#1a1a1a;color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+  .steps li div{font-size:.9rem;color:#444;padding-top:4px}
+  .steps li strong{display:block;color:#1a1a1a;font-weight:600;margin-bottom:2px}
+  .config-block{background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:1.25rem;font-family:monospace;font-size:.82rem;line-height:1.8;overflow-x:auto;margin:1rem 0}
+  .config-block .key{color:#9cdcfe}
+  .config-block .val{color:#ce9178}
+  .config-block .comment{color:#6a9955}
+  .schema-block{background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:1.25rem;font-family:monospace;font-size:.82rem;line-height:1.8;overflow-x:auto;margin:.75rem 0}
+  .schema-block .key{color:#9cdcfe}
+  .schema-block .val{color:#ce9178}
+  .schema-block .type{color:#f9e2af}
+  .schema-block .req{color:#f38ba8;font-size:.75rem}
+  .schema-block .comment{color:#6a9955}
+  .arch{background:#fff;border:1px solid #e5e3de;border-radius:10px;padding:1.5rem;margin:1rem 0}
+  .arch-row{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:.75rem 0}
+  .arch-box{background:#f8f7f4;border:1px solid #e5e3de;border-radius:8px;padding:.75rem 1.25rem;font-size:.85rem;font-weight:600;text-align:center;min-width:140px}
+  .arch-box.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  .arch-box.secondary{background:#f1f0eb;color:#374151}
+  .arch-arrow{text-align:center;color:#aaa;font-size:1.1rem;margin:.25rem 0}
+  .arch-sub{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+  .arch-sub .arch-box{min-width:120px;font-size:.8rem}
+  .toc{background:#fff;border:1px solid #e5e3de;border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:2rem}
+  .toc ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:.25rem}
+  .toc li a{color:#2563eb;text-decoration:none;font-size:.875rem}
+  .toc li a:hover{text-decoration:underline}
+  .toc-title{font-weight:600;font-size:.9rem;margin-bottom:.75rem;color:#374151}
+  .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1rem 0}
+  .perm-card{background:#fff;border:1px solid #e5e3de;border-radius:8px;padding:1rem}
+  .perm-card .perm-name{font-family:monospace;font-size:.8rem;font-weight:700;color:#5b21b6;background:#ede9fe;padding:2px 6px;border-radius:3px;display:inline-block;margin-bottom:.5rem}
+  .perm-card p{font-size:.82rem;color:#555;margin:0}
+  .highlight{background:#fffbeb;border-left:3px solid #f59e0b;padding:.75rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0;font-size:.875rem;color:#444}
+  .alert-info{background:#eff6ff;border-left:3px solid #3b82f6;padding:.75rem 1rem;border-radius:0 6px 6px 0;margin:1rem 0;font-size:.875rem;color:#1e40af}
+  .endpoint-card{background:#fff;border:1px solid #e5e3de;border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+  .endpoint-header{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.25rem;cursor:pointer;user-select:none}
+  .endpoint-header:hover{background:#fafaf9}
+  .endpoint-path{font-family:monospace;font-size:.82rem;color:#1a1a1a;font-weight:600;flex:1}
+  .endpoint-summary{font-size:.8rem;color:#888}
+  .endpoint-body{padding:1.25rem;border-top:1px solid #f0eeea;display:none}
+  .endpoint-body.open{display:block}
+  .endpoint-desc{font-size:.875rem;color:#555;margin-bottom:1rem;line-height:1.6}
+  .param-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:.75rem 0 .4rem}
+  .param-row{display:grid;grid-template-columns:160px 90px 1fr;gap:.5rem;padding:.5rem 0;border-bottom:1px solid #f5f4f0;font-size:.82rem;align-items:start}
+  .param-row:last-child{border-bottom:none}
+  .param-name{font-family:monospace;color:#c7254e;font-weight:600}
+  .param-type{color:#6366f1;font-size:.78rem;font-family:monospace}
+  .param-desc{color:#555}
+  .required-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#ef4444;margin-left:3px;vertical-align:middle}
+  .responses-grid{display:grid;gap:.4rem;margin:.5rem 0}
+  .response-row{display:flex;align-items:flex-start;gap:.75rem;padding:.5rem .75rem;background:#f8f7f4;border-radius:6px;font-size:.82rem}
+  .status-code{font-family:monospace;font-weight:700;min-width:36px}
+  .status-2xx{color:#166534}
+  .status-4xx{color:#92400e}
+  .status-5xx{color:#991b1b}
+  .response-desc{color:#555;font-size:.8rem}
+  .error-table td:first-child{font-family:monospace;font-weight:600}
+  @media(max-width:600px){.toc ul{grid-template-columns:1fr}.perm-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.param-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div style="margin-bottom:2rem">
+  <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
+    <h1>Consent Management System</h1>
+    <span class="badge badge-green">v1.0</span>
+    <span class="badge badge-gray">REST / JSON</span>
+    <span class="badge badge-blue">Multi-tenant</span>
+  </div>
+  <p class="subtitle">A multi-tenant solution for managing customer consent across sites — covering opt-in/opt-out tracking, expiration policies, audit trails, and CSV reporting.</p>
+  <div style="font-size:.85rem;color:#666">Base URL: <code>https://api.upstartcommerce.com/v1</code></div>
+</div>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ul>
+    <li><a href="#concepts">Core concepts</a></li>
+    <li><a href="#howit">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#auth">Authorization</a></li>
+    <li><a href="#api">API reference</a></li>
+    <li><a href="#errors">Error codes</a></li>
+    <li><a href="#schema">Database schema</a></li>
+    <li><a href="#config">Configuration</a></li>
+    <li><a href="#arch">Architecture</a></li>
+  </ul>
+</div>
+
+<!-- CORE CONCEPTS -->
+<h2 id="concepts">Core concepts</h2>
+<div class="cards">
+  <div class="card">
+    <div class="card-icon">🗂</div>
+    <h3>Data points</h3>
+    <p>Foundational building blocks representing specific types of data that can be collected or processed. Loaded from classpath JSON at startup.</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">📋</div>
+    <h3>Categories</h3>
+    <p>Group related data points under a single consent topic. Customers grant or revoke consent at the category level.</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">✅</div>
+    <h3>Consent choices</h3>
+    <p>Records a customer's opt-in or opt-out decision for a specific category, with optional expiry support.</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">⏱</div>
+    <h3>Expiration</h3>
+    <p>Per-category expiry duration with daily scheduler. Email reminders sent N days before expiry with de-duplication.</p>
+  </div>
+</div>
+
+<h3>Data point fields</h3>
+<table>
+  <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>id</code></td><td>String</td><td>Unique identifier</td></tr>
+  <tr><td><code>label</code></td><td>String</td><td>Human-readable name</td></tr>
+  <tr><td><code>compliance</code></td><td>List[String]</td><td>Applicable frameworks (e.g. GDPR, CCPA)</td></tr>
+  <tr><td><code>dataType</code></td><td>String</td><td>Type classification of the data</td></tr>
+  <tr><td><code>path</code></td><td>Option[String]</td><td>Optional path reference</td></tr>
+  <tr><td><code>system</code></td><td>Boolean</td><td>System-defined points cannot be deleted</td></tr>
+</table>
+
+<h3>Consent choice fields</h3>
+<table>
+  <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>customerId</code></td><td>CustomerId</td><td>The customer who made the choice</td></tr>
+  <tr><td><code>categoryId</code></td><td>UUID</td><td>The category being consented to</td></tr>
+  <tr><td><code>consentStatus</code></td><td>String</td><td><code>optIn</code> or <code>optOut</code></td></tr>
+  <tr><td><code>expiresAt</code></td><td>Option[Instant]</td><td>When the consent expires (if applicable)</td></tr>
+  <tr><td><code>expired</code></td><td>Boolean</td><td>Whether the consent has already expired</td></tr>
+</table>
+
+<!-- HOW IT WORKS -->
+<h2 id="howit">How it works</h2>
+<ol class="steps">
+  <li><div><strong>Tenant setup</strong>Enable consent management via <code>POST /customer/consent</code> with <code>{ "enabled": true }</code>. On service startup, <code>ConsentTenantBootstrap</code> loads system categories and data points from JSON. File changes are tracked via SHA-256 hashes for idempotent updates.</div></li>
+  <li><div><strong>Category configuration</strong>View data points via <code>GET /customer/consent/datapoints</code>, create custom categories via <code>POST /customer/consent/categories</code>, then configure which are active via <code>POST /customer/consent/configurations</code>. Each change is versioned.</div></li>
+  <li><div><strong>Recording consent</strong>Call <code>POST /customer/profiles/{customerId}/consents</code> with <code>{ categoryId, consentStatus }</code>. The system validates the category, stores the choice, creates an audit entry, and writes a YYYYMM-partitioned history row.</div></li>
+  <li><div><strong>Expiration handling</strong>If configured, consents get an <code>expiresAt</code> timestamp. The <code>ConsentExpiryScheduler</code> runs daily to mark expired records. The <code>ConsentExpiryReminderNotifier</code> sends email reminders N days before expiry.</div></li>
+  <li><div><strong>Policy notifications</strong>When policies change, trigger <code>POST /customer/consent/configurations/notify</code> to email all affected customers.</div></li>
+</ol>
+
+<!-- FEATURES -->
+<h2 id="features">Features</h2>
+<div class="cards">
+  <div class="card"><h3>Consent toggle</h3><p>Enable or disable consent management at the tenant level. All consent operations are locked when disabled.</p></div>
+  <div class="card"><h3>Custom categories (CRUD)</h3><p>Full create, read, update, patch, and delete — both single and batch. System categories and opted-in categories are protected from deletion.</p></div>
+  <div class="card"><h3>Configuration versioning</h3><p>Every configuration change is versioned. Full history available via <code style="word-break:break-all">GET /customer/consent/configurations/history</code>.</p></div>
+  <div class="card"><h3>Consent expiration</h3><p>Global toggle per tenant. Per-category duration settings. Option to retroactively apply expiry to existing consents.</p></div>
+  <div class="card"><h3>Email notifications</h3><p>Automated expiry reminder emails (de-duplicated, configurable days-before). On-demand policy update notifications.</p></div>
+  <div class="card"><h3>Audit trail</h3><p>Every consent change is recorded with full audit metadata. Category lifecycle events (create, update, delete) are all tracked.</p></div>
+  <div class="card"><h3>CSV reporting</h3><p>Query consent history by tenant, customer, category, and date range. Download as CSV via <code>POST /customer/consent/history/download</code>.</p></div>
+  <div class="card"><h3>Tenant bootstrap</h3><p>System categories and data points auto-loaded from classpath JSON on startup. File hash tracking prevents duplicate loads.</p></div>
+</div>
+
+<!-- AUTHORIZATION -->
+<h2 id="auth">Authorization &amp; permissions</h2>
+<div class="highlight">Service-level roles bypass individual permission checks. All other consent endpoints require role-based authorization.</div>
+
+<h3>Authentication schemes</h3>
+<table>
+  <tr><th>Scheme</th><th>Header</th><th>Description</th></tr>
+  <tr><td><span class="badge badge-blue">API Key</span></td><td><code>X-Upstart-Api-Key</code></td><td>API key based authorization for service-to-service calls</td></tr>
+  <tr><td><span class="badge badge-gray">Session</span></td><td><code>X-Upstart-Session-Id</code></td><td>Session-based authorization for logged-in management users</td></tr>
+  <tr><td><span class="badge badge-green">Bearer JWT</span></td><td><code>Authorization: Bearer ...</code></td><td>Required for customer-facing endpoints (e.g. recording consent choices)</td></tr>
+</table>
+
+<h3>Permission levels</h3>
+<div class="perm-grid">
+  <div class="perm-card"><div class="perm-name">customer.consent.read</div><p>View categories, configurations, and choices. No prerequisites.</p></div>
+  <div class="perm-card"><div class="perm-name">customer.consent.create</div><p>Create categories and configurations. Requires <code>read</code>.</p></div>
+  <div class="perm-card"><div class="perm-name">customer.consent.update</div><p>Update categories, configurations, and expiry. Requires <code>read</code> + <code>create</code>.</p></div>
+  <div class="perm-card"><div class="perm-name">customer.consent.delete</div><p>Delete categories and configurations. Requires <code>read</code> + <code>create</code> + <code>update</code>.</p></div>
+  <div class="perm-card"><div class="perm-name">customer.consent.report.download</div><p>Download consent history CSV. Requires <code>read</code>.</p></div>
+</div>
+
+<!-- API REFERENCE -->
+<h2 id="api">API reference</h2>
+<div class="alert-info">Click any endpoint to expand request details, parameters, and response codes.</div>
+
+<h3>Consent toggle</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent</span>
+    <span class="endpoint-summary">Get consent status for tenant</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Retrieves the current consent management status for the tenant, including enabled state and associated site IDs.</p>
+    <div class="param-section-title">Headers</div>
+    <div class="param-row"><span class="param-name">x-upstart-tenant<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Tenant identifier</span></div>
+    <div class="param-row"><span class="param-name">x-upstart-site<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Site identifier</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns <code>Consent</code> object with <code>enabled</code>, <code>siteIds</code>, <code>tenant</code>, <code>audit_modified</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">401</span><span class="response-desc">Unauthorized — invalid credentials</span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">Consent record not found for tenant</span></div>
+      <div class="response-row"><span class="status-code status-5xx">500</span><span class="response-desc">Internal server error</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/consent</span>
+    <span class="endpoint-summary">Enable or disable consent management</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Updates the consent management toggle for the tenant. Set <code>enabled: true</code> to activate or <code>false</code> to disable all consent operations.</p>
+    <div class="param-section-title">Request Body — <code>ConsentStatus</code></div>
+    <div class="schema-block">{ <span class="key">"enabled"</span>: <span class="type">boolean</span> <span class="req">required</span> }</div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns updated <code>ConsentStatus</code> object</span></div>
+      <div class="response-row"><span class="status-code status-4xx">400</span><span class="response-desc">Invalid request body</span></div>
+      <div class="response-row"><span class="status-code status-4xx">401</span><span class="response-desc">Unauthorized</span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Categories</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent/categories</span>
+    <span class="endpoint-summary">List all categories with data points</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Returns all consent categories for the tenant and site, each enriched with their associated data point definitions.</p>
+    <div class="param-section-title">Headers</div>
+    <div class="param-row"><span class="param-name">x-upstart-tenant<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Tenant identifier</span></div>
+    <div class="param-row"><span class="param-name">x-upstart-site<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Site identifier</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Array of <code>ConsentCategory</code> objects</span></div>
+      <div class="response-row"><span class="status-code status-4xx">423</span><span class="response-desc">Consent management is disabled for this tenant</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/consent/categories</span>
+    <span class="endpoint-summary">Create a custom category</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Creates a new custom consent category with selectable data points. Duplicate names within the same tenant are rejected.</p>
+    <div class="param-section-title">Request Body — <code>CreateCustomConsentCategoryRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"tenant"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"name"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"description"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"dataPoint"</span>: <span class="type">string[]</span> <span class="req">required</span> <span class="comment">// data point IDs</span><br>
+&nbsp;&nbsp;<span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"id"</span>: <span class="type">UUID</span> <span class="comment">// optional, auto-generated if omitted</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns <code>CustomConsentCategoryResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">409</span><span class="response-desc">Category name already exists for this tenant</span></div>
+      <div class="response-row"><span class="status-code status-4xx">423</span><span class="response-desc">Consent management is disabled</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method put">PUT</span>
+    <span class="endpoint-path">/customer/consent/categories/{categoryId}</span>
+    <span class="endpoint-summary">Full update a category</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Replaces all fields of an existing custom consent category. All required fields must be provided.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">categoryId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the category to update</span></div>
+    <div class="param-section-title">Request Body — <code>CustomConsentCategoryUpdateRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"tenant"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"name"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"description"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"dataPoint"</span>: <span class="type">string[]</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"id"</span>: <span class="type">UUID</span> <span class="comment">// must match path param if provided</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns <code>CustomConsentCategoryUpdateResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">Category not found</span></div>
+      <div class="response-row"><span class="status-code status-4xx">409</span><span class="response-desc">Name conflict with another category</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method patch">PATCH</span>
+    <span class="endpoint-path">/customer/consent/categories/{categoryId}</span>
+    <span class="endpoint-summary">Partial update a category</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Partially updates an existing custom consent category. Only the fields provided will be updated; omitted fields retain their current values.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">categoryId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the category</span></div>
+    <div class="param-section-title">Request Body — <code>CustomConsentCategoryPatchRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"tenant"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"name"</span>: <span class="type">string</span> <span class="comment">// optional</span><br>
+&nbsp;&nbsp;<span class="key">"description"</span>: <span class="type">string</span> <span class="comment">// optional</span><br>
+&nbsp;&nbsp;<span class="key">"dataPoint"</span>: <span class="type">string[]</span> <span class="comment">// optional</span><br>
+&nbsp;&nbsp;<span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="comment">// optional</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns <code>CustomConsentCategoryUpdateResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">Category not found</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method delete">DELETE</span>
+    <span class="endpoint-path">/customer/consent/categories/{tenant}/{categoryId}</span>
+    <span class="endpoint-summary">Delete a custom category</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Permanently deletes a custom consent category. System-defined categories and categories with active customer opt-ins cannot be deleted.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">tenant<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Tenant identifier</span></div>
+    <div class="param-row"><span class="param-name">categoryId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the category to delete</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">204</span><span class="response-desc">Category deleted successfully. No content returned.</span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">Category not found</span></div>
+      <div class="response-row"><span class="status-code status-4xx">409</span><span class="response-desc">Category is system-defined or has active opt-ins</span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Batch operations</h3>
+<div class="highlight">A <code>207 Multi-Status</code> response is returned when some operations succeed and others fail, containing <code>successIds</code> and <code>errors</code> arrays.</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/consent/categories/batch</span>
+    <span class="endpoint-summary">Batch create categories</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Creates multiple custom consent categories in a single request. Each item follows the same rules as single create.</p>
+    <div class="param-section-title">Request Body</div>
+    <div class="schema-block"><span class="type">CreateCustomConsentCategoryRequest[]</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">201</span><span class="response-desc">All categories created. Returns array of <code>CustomConsentCategoryResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-2xx">207</span><span class="response-desc">Partial success. Returns <code>MultiStatusResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">409</span><span class="response-desc">One or more names conflict with existing categories</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method put">PUT</span>
+    <span class="endpoint-path">/customer/consent/categories/batch</span>
+    <span class="endpoint-summary">Batch full update categories</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Fully replaces multiple consent categories. Each item must include all required fields including <code>id</code>.</p>
+    <div class="param-section-title">Request Body — <code>CustomConsentCategoryUpdateBatchRequest[]</code></div>
+    <div class="schema-block">
+[{<br>
+&nbsp;&nbsp;<span class="key">"id"</span>: <span class="type">UUID</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"tenant"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"name"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"description"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"dataPoint"</span>: <span class="type">string[]</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="req">required</span><br>
+}]
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">All updated. Returns array of <code>CustomConsentCategoryUpdateResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-2xx">207</span><span class="response-desc">Partial success. Returns <code>MultiStatusResponse</code></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method patch">PATCH</span>
+    <span class="endpoint-path">/customer/consent/categories/batch</span>
+    <span class="endpoint-summary">Batch partial update categories</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Partially updates multiple consent categories. Only fields provided in each item are updated.</p>
+    <div class="param-section-title">Request Body — <code>BatchCustomConsentCategoryPatchRequest[]</code></div>
+    <div class="schema-block">
+[{<br>
+&nbsp;&nbsp;<span class="key">"id"</span>: <span class="type">UUID</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"tenant"</span>: <span class="type">string</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"name"</span>: <span class="type">string</span> <span class="comment">// optional</span><br>
+&nbsp;&nbsp;<span class="key">"description"</span>: <span class="type">string</span> <span class="comment">// optional</span><br>
+&nbsp;&nbsp;<span class="key">"dataPoint"</span>: <span class="type">string[]</span> <span class="comment">// optional</span><br>
+&nbsp;&nbsp;<span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="comment">// optional</span><br>
+}]
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">All updated. Returns array of <code>CustomConsentCategoryUpdateResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-2xx">207</span><span class="response-desc">Partial success. Returns <code>MultiStatusResponse</code></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method delete">DELETE</span>
+    <span class="endpoint-path">/customer/consent/categories/batch</span>
+    <span class="endpoint-summary">Batch delete categories</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Deletes multiple custom consent categories by their IDs. System categories and those with active opt-ins will fail individually.</p>
+    <div class="param-section-title">Request Body — <code>BatchDeleteCustomCategories</code></div>
+    <div class="schema-block">{ <span class="key">"id"</span>: <span class="type">UUID[]</span> <span class="req">required</span> }</div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">204</span><span class="response-desc">All categories deleted successfully</span></div>
+      <div class="response-row"><span class="status-code status-2xx">207</span><span class="response-desc">Partial success. Returns <code>DeleteConsentCategoriesPartialResponse</code></span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Data points</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent/datapoints</span>
+    <span class="endpoint-summary">List available data points</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Returns all consent data points available for the tenant and site. These are the building blocks used to compose consent categories.</p>
+    <div class="param-section-title">Headers</div>
+    <div class="param-row"><span class="param-name">x-upstart-tenant<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Tenant identifier</span></div>
+    <div class="param-row"><span class="param-name">x-upstart-site<span class="required-dot"></span></span><span class="param-type">string</span><span class="param-desc">Site identifier</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Array of <code>ConsentDataPoint</code> objects</span></div>
+      <div class="response-row"><span class="status-code status-4xx">423</span><span class="response-desc">Consent management is disabled</span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Configurations</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent/configurations</span>
+    <span class="endpoint-summary">Get all configurations</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Retrieves all consent category configurations for the tenant, including enabled/disabled state and associated timestamps.</p>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Array of <code>GetCategoryConfigurationsResponse</code></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/consent/configurations</span>
+    <span class="endpoint-summary">Create or update configurations</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Creates or updates one or more consent category configurations. Each setting enables or disables a specific category for the tenant.</p>
+    <div class="param-section-title">Request Body — <code>ConsentCategoryConfigurationRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"settings"</span>: [{ <span class="key">"categoryId"</span>: <span class="type">UUID</span>, <span class="key">"enabled"</span>: <span class="type">boolean</span> }] <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="comment">// optional</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">201</span><span class="response-desc">Returns <code>ConsentCategoryConfigurationResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">One or more category IDs not found</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent/configurations/history</span>
+    <span class="endpoint-summary">Get configuration version history</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Retrieves the full version history of consent configurations for the tenant. Each version captures which categories were enabled or disabled at that point in time.</p>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Array of <code>ConsentHistoryResponse</code> with versioned configuration snapshots</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/consent/configurations/notify</span>
+    <span class="endpoint-summary">Notify customers of policy update</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Triggers email notifications to existing customers about a consent policy update. Returns <code>202 Accepted</code> — notifications are processed asynchronously.</p>
+    <div class="param-section-title">Request Body — <code>ConsentPolicyNotifyRequest</code></div>
+    <div class="schema-block">{ <span class="key">"siteIds"</span>: <span class="type">string[]</span> <span class="comment">// optional — omit to notify all sites</span> }</div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">202</span><span class="response-desc">Notification job accepted and queued for async processing</span></div>
+      <div class="response-row"><span class="status-code status-4xx">423</span><span class="response-desc">Consent management is disabled</span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Expiration settings</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent/expiration-toggle</span>
+    <span class="endpoint-summary">Get expiration toggle status</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Retrieves whether the consent expiration feature is currently enabled for the tenant.</p>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns <code>ConsentExpirationToggle</code> — <code>{ "enabled": boolean }</code></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method put">PUT</span>
+    <span class="endpoint-path">/customer/consent/expiration-toggle</span>
+    <span class="endpoint-summary">Toggle expiration globally</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Enables or disables the consent expiration feature for the entire tenant. When disabled, no consents will expire regardless of per-category settings.</p>
+    <div class="param-section-title">Request Body</div>
+    <div class="schema-block">{ <span class="key">"enabled"</span>: <span class="type">boolean</span> <span class="req">required</span> }</div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns updated <code>ConsentExpirationToggle</code></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/consent/category-expiration/{categoryId}</span>
+    <span class="endpoint-summary">Get category expiration settings</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Retrieves the expiration configuration for a specific consent category, including whether expiry is enabled and the configured duration.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">categoryId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the consent category</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns <code>ConsentCategoryExpirationResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">Category not found</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method put">PUT</span>
+    <span class="endpoint-path">/customer/consent/category-expiration/{categoryId}</span>
+    <span class="endpoint-summary">Update category expiration</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Updates the expiration configuration for a specific consent category. Optionally retroactively applies the new expiry duration to all existing consents.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">categoryId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the consent category</span></div>
+    <div class="param-section-title">Request Body — <code>ConsentCategoryExpirationRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"expiryEnabled"</span>: <span class="type">boolean</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"expiryDuration"</span>: <span class="type">string</span> <span class="req">required</span> <span class="comment">// e.g. "1 year 2 months 3 days"</span><br>
+&nbsp;&nbsp;<span class="key">"updateExistingConsents"</span>: <span class="type">boolean</span> <span class="comment">// retroactively apply to existing</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Returns updated <code>ConsentCategoryExpirationResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">Category not found</span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Customer consent</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/profiles/{customerId}/consents</span>
+    <span class="endpoint-summary">Record a consent choice</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Records a customer's opt-in or opt-out decision for a specific consent category. Requires a logged-in Bearer JWT. Duplicate choices (same status already recorded) are rejected with <code>DUPLICATE_CHOICE</code>.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">customerId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the customer</span></div>
+    <div class="param-section-title">Request Body — <code>CustomerConsentChoiceRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"categoryId"</span>: <span class="type">UUID</span> <span class="req">required</span><br>
+&nbsp;&nbsp;<span class="key">"consentStatus"</span>: <span class="type">"optIn" | "optOut"</span> <span class="req">required</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Consent choice recorded successfully</span></div>
+      <div class="response-row"><span class="status-code status-4xx">400</span><span class="response-desc">Category not found or duplicate choice (<code>DUPLICATE_CHOICE</code>)</span></div>
+      <div class="response-row"><span class="status-code status-4xx">423</span><span class="response-desc">Consent management is disabled</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method get">GET</span>
+    <span class="endpoint-path">/customer/profiles/{customerId}/consents/{categoryId}/history</span>
+    <span class="endpoint-summary">Get consent history for a customer</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Returns the full consent choice history for a specific customer and category. Each record includes event ID, status, site, and full audit metadata.</p>
+    <div class="param-section-title">Path Parameters</div>
+    <div class="param-row"><span class="param-name">customerId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the customer</span></div>
+    <div class="param-row"><span class="param-name">categoryId<span class="required-dot"></span></span><span class="param-type">UUID</span><span class="param-desc">Unique identifier of the consent category</span></div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">Array of <code>CustomerConsentHistoryResponse</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">404</span><span class="response-desc">No history found for this customer and category</span></div>
+    </div>
+  </div>
+</div>
+
+<h3>Reports &amp; notifications</h3>
+<div class="endpoint-card">
+  <div class="endpoint-header" onclick="toggle(this)">
+    <span class="method post">POST</span>
+    <span class="endpoint-path">/customer/consent/history/download</span>
+    <span class="endpoint-summary">Download consent history as CSV</span>
+  </div>
+  <div class="endpoint-body">
+    <p class="endpoint-desc">Generates and streams a CSV report of customer consent history within the specified date range. Optionally filter by customer or category. History is partitioned by YYYYMM for efficient querying. Returns <code>text/csv</code>.</p>
+    <div class="param-section-title">Request Body — <code>CustomerConsentHistoryReportRequest</code></div>
+    <div class="schema-block">
+{<br>
+&nbsp;&nbsp;<span class="key">"from"</span>: <span class="type">date-time</span> <span class="req">required</span> <span class="comment">// ISO 8601, e.g. "2026-01-01T00:00:00Z"</span><br>
+&nbsp;&nbsp;<span class="key">"to"</span>: <span class="type">date-time</span> <span class="req">required</span> <span class="comment">// ISO 8601, e.g. "2026-12-31T23:59:59Z"</span><br>
+&nbsp;&nbsp;<span class="key">"customerId"</span>: <span class="type">UUID</span> <span class="comment">// optional filter</span><br>
+&nbsp;&nbsp;<span class="key">"categoryId"</span>: <span class="type">UUID</span> <span class="comment">// optional filter</span><br>
+}
+    </div>
+    <div class="param-section-title">Responses</div>
+    <div class="responses-grid">
+      <div class="response-row"><span class="status-code status-2xx">200</span><span class="response-desc">CSV file stream — <code>Content-Type: text/csv</code></span></div>
+      <div class="response-row"><span class="status-code status-4xx">400</span><span class="response-desc">Invalid date range or filter parameters</span></div>
+      <div class="response-row"><span class="status-code status-4xx">403</span><span class="response-desc">Missing <code>customer.consent.report.download</code> permission</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ERROR CODES -->
+<h2 id="errors">Error codes</h2>
+<table class="error-table">
+  <tr><th>HTTP</th><th>Code</th><th>Description</th></tr>
+  <tr><td><span class="badge badge-amber">400</span></td><td><code>CATEGORY_NOT_FOUND</code></td><td>The specified consent category does not exist</td></tr>
+  <tr><td><span class="badge badge-amber">400</span></td><td><code>DUPLICATE_CHOICE</code></td><td>Customer has already made this consent choice</td></tr>
+  <tr><td><span class="badge badge-amber">400</span></td><td><code>DATAPOINT_NOT_FOUND</code></td><td>One or more specified data points do not exist</td></tr>
+  <tr><td><span class="badge badge-amber">400</span></td><td><code>ID_MISMATCH</code></td><td>Category ID in body does not match path parameter</td></tr>
+  <tr><td><span class="badge badge-red">401</span></td><td><code>TENANT_MISMATCH</code></td><td>Request tenant does not match the authorized tenant</td></tr>
+  <tr><td><span class="badge badge-red">401</span></td><td><code>SITE_NOT_AUTHORIZED</code></td><td>One or more sites are not authorized for this operation</td></tr>
+  <tr><td><span class="badge badge-amber">409</span></td><td><code>DUPLICATE_NAME_ERROR</code></td><td>Category name already exists for this tenant</td></tr>
+  <tr><td><span class="badge badge-amber">409</span></td><td><code>CATEGORY_IN_USE</code></td><td>Category has active opt-ins and cannot be deleted</td></tr>
+  <tr><td><span class="badge badge-amber">409</span></td><td><code>SYSTEM_CATEGORY_DELETE_DENIED</code></td><td>System-defined categories cannot be deleted</td></tr>
+  <tr><td><span class="badge badge-purple">423</span></td><td><code>consentLOCKED</code></td><td>Consent management is disabled for this tenant</td></tr>
+  <tr><td><span class="badge badge-red">500</span></td><td>—</td><td>Unexpected internal server error</td></tr>
+</table>
+
+<!-- DATABASE SCHEMA -->
+<h2 id="schema">Database schema (Cassandra)</h2>
+<table>
+  <tr><th>Table</th><th>Partition key</th><th>Purpose</th></tr>
+  <tr><td><code>consent</code></td><td><code>(tenant)</code></td><td>Tenant-level consent toggle</td></tr>
+  <tr><td><code>consent_categories</code></td><td><code>(tenant)</code></td><td>Category definitions</td></tr>
+  <tr><td><code>consent_data_points</code></td><td><code>(tenant)</code></td><td>Data point definitions</td></tr>
+  <tr><td><code>consent_category_audit</code></td><td><code>(tenant, category_id)</code></td><td>Category lifecycle tracking</td></tr>
+  <tr><td><code>file_hashes</code></td><td><code>(tenant)</code></td><td>Bootstrap file version tracking</td></tr>
+  <tr><td><code>consent_configurations</code></td><td><code>(tenant)</code></td><td>Per-category enable/disable</td></tr>
+  <tr><td><code>consent_configuration_history</code></td><td><code>(tenant)</code></td><td>Versioned config changes</td></tr>
+  <tr><td><code>customer_consent_choice</code></td><td><code>(tenant, customer_id, category_id)</code></td><td>Customer consent decisions</td></tr>
+  <tr><td><code>customer_consent_audit</code></td><td><code>(tenant, site_id, event_id)</code></td><td>Full audit trail</td></tr>
+  <tr><td><code>customer_consent_history_report</code></td><td><code>(tenant, year_month)</code></td><td>YYYYMM-partitioned reporting</td></tr>
+  <tr><td><code>customer_consent_choice_expiry</code></td><td><code>(tenant, expiry_date)</code></td><td>Expiry date index</td></tr>
+  <tr><td><code>customer_consent_choice_expiry_update</code></td><td><code>(tenant, category_id)</code></td><td>Tracks consents needing expiry update</td></tr>
+  <tr><td><code>tenant_consent_expiration_toggle</code></td><td><code>(tenant)</code></td><td>Global expiration feature flag</td></tr>
+  <tr><td><code>consent_category_expiration</code></td><td><code>(tenant, category_id)</code></td><td>Per-category expiry settings</td></tr>
+  <tr><td><code>consent_notification_sent</code></td><td><code>(tenant, customer_id, category_id)</code></td><td>Notification de-duplication (TTL: 30 days)</td></tr>
+</table>
+
+<h3>Partitioning strategy</h3>
+<div class="cards">
+  <div class="card"><h3>Customer choices</h3><p>Partitioned by <code>(tenant, customer_id, category_id)</code> for fast per-customer lookups.</p></div>
+  <div class="card"><h3>History reports</h3><p>Partitioned by <code>(tenant, year_month)</code> with clustering on <code>(created_at, category_id, customer_id, event_id)</code> for efficient date-range queries.</p></div>
+  <div class="card"><h3>Expiry lookups</h3><p>Partitioned by <code>(tenant, expiry_date)</code> with clustering on <code>(category_id, customer_id)</code> for daily batch processing.</p></div>
+</div>
+
+<!-- CONFIGURATION -->
+<h2 id="config">Configuration</h2>
+<div class="config-block">
+<span class="comment"># application.conf</span><br>
+customer {<br>
+&nbsp;&nbsp;<span class="key">consent-expiration-scheduler</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">intervalHours</span> = <span class="val">24</span>&nbsp;&nbsp;<span class="comment"># how often the expiry scheduler runs</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">lookbackDays</span>&nbsp;&nbsp;= <span class="val">7</span>&nbsp;&nbsp;&nbsp;<span class="comment"># days to look back for missed expirations</span><br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="key">consent-expiry-notifier</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">runAtHour</span>&nbsp;&nbsp;&nbsp;= <span class="val">8</span>&nbsp;&nbsp;&nbsp;<span class="comment"># hour (MT) to send reminders</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">runAtMinutes</span>= <span class="val">0</span>&nbsp;&nbsp;&nbsp;<span class="comment"># minutes past the hour</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">beforeDays</span>&nbsp;&nbsp;= <span class="val">7</span>&nbsp;&nbsp;&nbsp;<span class="comment"># days before expiry to send reminder</span><br>
+&nbsp;&nbsp;}<br>
+}
+</div>
+
+<!-- ARCHITECTURE -->
+<h2 id="arch">Architecture</h2>
+<div class="arch">
+  <div class="arch-row"><div class="arch-box primary">HTTP API layer<br><small style="font-weight:400;font-size:.75rem">PekkoHttpHandler</small></div></div>
+  <div class="arch-arrow">↓</div>
+  <div class="arch-row"><div class="arch-box primary">ConsentService<br><small style="font-weight:400;font-size:.75rem">Business logic</small></div></div>
+  <div class="arch-arrow">↓</div>
+  <div class="arch-sub">
+    <div class="arch-box secondary">ConsentRepository<br><small style="font-size:.75rem">Cassandra</small></div>
+    <div class="arch-box secondary">ExpiryScheduler<br><small style="font-size:.75rem">Daily cron (UTC midnight)</small></div>
+    <div class="arch-box secondary">ReminderNotifier<br><small style="font-size:.75rem">Daily (8 AM MT)</small></div>
+    <div class="arch-box secondary">PolicyNotifier<br><small style="font-size:.75rem">On-demand</small></div>
+  </div>
+</div>
+
+<div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid #e5e3de;font-size:.8rem;color:#999;text-align:center">
+  Consent Management System &mdash; Internal Documentation &nbsp;·&nbsp; UpStart Commerce, Inc.
+</div>
+
+</div>
+
+<script>
+function toggle(header){
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+</script>
+</body>
+</html>
